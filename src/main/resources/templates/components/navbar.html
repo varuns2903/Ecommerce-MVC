@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <!-- Head content remains the same -->
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top" th:fragment="navbar">
+    <div class="container">
+        <!-- App Icon and Name -->
+        <a class="navbar-brand" th:href="@{/}">
+            <img src="https://via.placeholder.com/40" alt="ShopEase Logo">
+            ShopEase
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <!-- Search Bar -->
+            <form class="d-flex mx-lg-3 search-bar" th:action="@{/search}">
+                <div class="input-group">
+                    <input class="form-control" type="search" name="query" placeholder="Search products..." aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Navigation Links -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${request.servletPath == '/'} ? 'active'" th:href="@{/}">
+                        <i class="fas fa-home me-1"></i> Home
+                    </a>
+                </li>
+
+                <!-- Categories Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-list me-1"></i> Categories
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/category/electronics}">Electronics</a></li>
+                        <li><a class="dropdown-item" th:href="@{/category/clothing}">Clothing</a></li>
+                        <li><a class="dropdown-item" th:href="@{/category/home-kitchen}">Home & Kitchen</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" th:href="@{/categories}">View All</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- Cart and Profile -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/cart}">
+                        <i class="fas fa-shopping-cart me-1"></i> Cart
+                        <span class="badge bg-danger rounded-pill cart-badge"
+                              th:text="${cartItemCount}" th:if="${cartItemCount != null && cartItemCount > 0}">0</span>
+                    </a>
+                </li>
+                <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                    <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i> Profile
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" th:href="@{/account}">My Account</a></li>
+                        <li><a class="dropdown-item" th:href="@{/orders}">Orders</a></li>
+                        <li><a class="dropdown-item" th:href="@{/wishlist}">Wishlist</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" th:href="@{/logout}">Logout</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" th:href="@{/login}">
+                        <i class="fas fa-sign-in-alt me-1"></i> Login
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+</body>
+</html>
