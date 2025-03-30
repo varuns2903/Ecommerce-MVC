@@ -9,6 +9,19 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        .category-card {
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+        .category-img {
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
         .product-card {
             transition: transform 0.3s;
             margin-bottom: 20px;
@@ -22,6 +35,11 @@
             object-fit: contain;
             padding: 10px;
         }
+        .section-title {
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
     </style>
 </head>
 <body>
@@ -30,148 +48,57 @@
 
 <!-- Main Content -->
 <div class="container my-4">
-    <h2 class="mb-4">Featured Products</h2>
 
-    <!-- Product Grid -->
-    <div class="row">
-        <!-- Product Card 1 -->
-        <div class="col-md-4 col-sm-6">
-            <div class="card product-card">
-                <img src="https://via.placeholder.com/300" class="card-img-top product-img" alt="Product Image">
-                <div class="card-body">
-                    <h5 class="card-title">Wireless Bluetooth Headphones</h5>
-                    <p class="card-text text-muted">Premium sound quality with noise cancellation</p>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="h5 text-primary">$129.99</span>
-                        <span class="text-success"><i class="fas fa-star"></i> 4.5</span>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-primary" type="button">
-                            <i class="fas fa-cart-plus me-2"></i> Add to Cart
-                        </button>
-                        <button class="btn btn-outline-success" type="button">
-                            <i class="fas fa-bolt me-2"></i> Buy Now
-                        </button>
-                    </div>
-                </div>
+    <!-- Categories Section -->
+    <h2 class="section-title">Shop by Categories</h2>
+    <div class="row" th:if="${not #lists.isEmpty(categories)}">
+        <div class="col-md-3 col-sm-6" th:each="category : ${categories}">
+            <div class="category-card">
+                <a th:href="@{/category/{id}(id=${category.id})}" class="text-decoration-none">
+                    <h5 class="mt-2" th:text="${category.name}">Category Name</h5>
+                </a>
             </div>
         </div>
+    </div>
 
-        <!-- Product Card 2 -->
-        <div class="col-md-4 col-sm-6">
+    <!-- Featured Products Section -->
+    <h2 class="section-title">Featured Products</h2>
+    <div class="row" th:if="${not #lists.isEmpty(featuredProducts)}">
+        <div class="col-md-4 col-sm-6" th:each="product : ${featuredProducts}">
             <div class="card product-card">
-                <img src="https://via.placeholder.com/300" class="card-img-top product-img" alt="Product Image">
+                <img th:src="${product.imageUrl}" class="card-img-top product-img" alt="Product Image"
+                     th:attr="onerror=@{this.src='https://via.placeholder.com/300?text=No+Image'}">
                 <div class="card-body">
-                    <h5 class="card-title">Smart Watch Pro</h5>
-                    <p class="card-text text-muted">Fitness tracking and smartphone notifications</p>
+                    <h5 class="card-title" th:text="${product.name}">Product Name</h5>
+                    <p class="card-text text-muted" th:text="${product.description}">Product description</p>
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="h5 text-primary">$199.99</span>
-                        <span class="text-success"><i class="fas fa-star"></i> 4.7</span>
+                        <span class="h5 text-primary">
+                            $<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span>
+                            <span th:if="${product.discountPercentage > 0}" class="text-danger small ms-2">
+                                <del th:text="${'$' + #numbers.formatDecimal(product.originalPrice, 1, 2)}"></del>
+                                <span th:text="${'-' + product.discountPercentage + '%'}"></span>
+                            </span>
+                        </span>
+                        <span class="text-success">
+                            <i class="fas fa-star"></i>
+                            <span th:text="${product.averageRating}">4.5</span>
+                        </span>
                     </div>
                     <div class="d-grid gap-2">
-                        <button class="btn btn-primary" type="button">
+                        <button class="btn btn-primary" type="button"
+                                th:onclick="|addToCart('${product.id}')|">
                             <i class="fas fa-cart-plus me-2"></i> Add to Cart
                         </button>
-                        <button class="btn btn-outline-success" type="button">
+                        <a th:href="@{/product/{id}(id=${product.id})}" class="btn btn-outline-success">
                             <i class="fas fa-bolt me-2"></i> Buy Now
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Product Card 3 -->
-        <div class="col-md-4 col-sm-6">
-            <div class="card product-card">
-                <img src="https://via.placeholder.com/300" class="card-img-top product-img" alt="Product Image">
-                <div class="card-body">
-                    <h5 class="card-title">Portable Bluetooth Speaker</h5>
-                    <p class="card-text text-muted">20W stereo sound with 12hr battery</p>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="h5 text-primary">$79.99</span>
-                        <span class="text-success"><i class="fas fa-star"></i> 4.3</span>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-primary" type="button">
-                            <i class="fas fa-cart-plus me-2"></i> Add to Cart
-                        </button>
-                        <button class="btn btn-outline-success" type="button">
-                            <i class="fas fa-bolt me-2"></i> Buy Now
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Product Card 4 -->
-        <div class="col-md-4 col-sm-6">
-            <div class="card product-card">
-                <img src="https://via.placeholder.com/300" class="card-img-top product-img" alt="Product Image">
-                <div class="card-body">
-                    <h5 class="card-title">Wireless Charging Pad</h5>
-                    <p class="card-text text-muted">Fast charging for all Qi-enabled devices</p>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="h5 text-primary">$29.99</span>
-                        <span class="text-success"><i class="fas fa-star"></i> 4.1</span>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-primary" type="button">
-                            <i class="fas fa-cart-plus me-2"></i> Add to Cart
-                        </button>
-                        <button class="btn btn-outline-success" type="button">
-                            <i class="fas fa-bolt me-2"></i> Buy Now
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Product Card 5 -->
-        <div class="col-md-4 col-sm-6">
-            <div class="card product-card">
-                <img src="https://via.placeholder.com/300" class="card-img-top product-img" alt="Product Image">
-                <div class="card-body">
-                    <h5 class="card-title">Laptop Backpack</h5>
-                    <p class="card-text text-muted">Water-resistant with USB charging port</p>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="h5 text-primary">$49.99</span>
-                        <span class="text-success"><i class="fas fa-star"></i> 4.6</span>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-primary" type="button">
-                            <i class="fas fa-cart-plus me-2"></i> Add to Cart
-                        </button>
-                        <button class="btn btn-outline-success" type="button">
-                            <i class="fas fa-bolt me-2"></i> Buy Now
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Product Card 6 -->
-        <div class="col-md-4 col-sm-6">
-            <div class="card product-card">
-                <img src="https://via.placeholder.com/300" class="card-img-top product-img" alt="Product Image">
-                <div class="card-body">
-                    <h5 class="card-title">Smartphone Gimbal Stabilizer</h5>
-                    <p class="card-text text-muted">Professional video stabilization</p>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="h5 text-primary">$89.99</span>
-                        <span class="text-success"><i class="fas fa-star"></i> 4.4</span>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-primary" type="button">
-                            <i class="fas fa-cart-plus me-2"></i> Add to Cart
-                        </button>
-                        <button class="btn btn-outline-success" type="button">
-                            <i class="fas fa-bolt me-2"></i> Buy Now
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+
 </div>
 
 <!-- Include Footer -->
@@ -179,5 +106,36 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function addToCart(productId) {
+        fetch('/api/cart/add/' + productId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                // Update cart count
+                const cartBadge = document.querySelector('.cart-badge');
+                if(cartBadge) {
+                    cartBadge.textContent = data.cartItemCount;
+                    cartBadge.style.display = 'inline-block';
+                }
+                // Show success message
+                alert('Product added to cart!');
+            } else {
+                alert(data.message || 'Failed to add to cart');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    }
+</script>
 </body>
 </html>
