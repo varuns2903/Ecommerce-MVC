@@ -4,6 +4,7 @@ import com.ecommerce.app.model.Category;
 import com.ecommerce.app.model.Product;
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.repository.UserRepository;
+import com.ecommerce.app.service.CartService;
 import com.ecommerce.app.service.CategoryService;
 import com.ecommerce.app.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,11 +24,13 @@ public class HomeController {
     private final CategoryService categoryService;
     private final ProductService productService;
     private final UserRepository userRepository;
+    private final CartService cartService;
 
-    public HomeController(CategoryService categoryService, ProductService productService, UserRepository userRepository) {
+    public HomeController(CategoryService categoryService, ProductService productService, UserRepository userRepository, CartService cartService) {
         this.categoryService = categoryService;
         this.productService = productService;
         this.userRepository = userRepository;
+        this.cartService = cartService;
     }
 
     @GetMapping("/")
@@ -38,17 +41,22 @@ public class HomeController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
 
+        int cartItemCount = 0;
+
         if (isAuthenticated) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof UserDetails userDetails) {
                 Optional<User> user = userRepository.findByEmail(userDetails.getUsername());
-                user.ifPresent(value -> model.addAttribute("loggedInUser", value));
+                if (user.isPresent()) {
+                    model.addAttribute("loggedInUser", user.get());
+                    cartItemCount = cartService.getCartItemCount(user.get().getId());
+                }
             }
         }
 
         model.addAttribute("categories", categories);
         model.addAttribute("products", products);
-        model.addAttribute("isAuthenticated", isAuthenticated);
+        model.addAttribute("cartItemCount", cartItemCount);
         model.addAttribute("servletPath", request.getServletPath());
 
         System.out.println("Model: " + model.asMap());

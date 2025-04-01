@@ -1,3 +1,4 @@
+<!-- Home Page -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -8,39 +9,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .category-card {
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .category-card:hover {
-            transform: translateY(-5px);
-        }
-        .category-img {
-            height: 150px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        .product-card {
-            transition: transform 0.3s;
-            margin-bottom: 20px;
-        }
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .product-img {
-            height: 200px;
-            object-fit: contain;
-            padding: 10px;
-        }
-        .section-title {
-            margin: 40px 0 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-    </style>
 </head>
 <body>
 <!-- Include Navbar -->
@@ -48,23 +16,10 @@
 
 <!-- Main Content -->
 <div class="container my-4">
-
-    <!-- Categories Section -->
-    <h2 class="section-title">Shop by Categories</h2>
-    <div class="row" th:if="${not #lists.isEmpty(categories)}">
-        <div class="col-md-3 col-sm-6" th:each="category : ${categories}">
-            <div class="category-card">
-                <a th:href="@{/category/{id}(id=${category.id})}" class="text-decoration-none">
-                    <h5 class="mt-2" th:text="${category.name}">Category Name</h5>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Featured Products Section -->
-    <h2 class="section-title">Featured Products</h2>
-    <div class="row" th:if="${not #lists.isEmpty(featuredProducts)}">
-        <div class="col-md-4 col-sm-6" th:each="product : ${featuredProducts}">
+    <!-- All Products Section -->
+    <h2 class="section-title">All Products</h2>
+    <div class="row" th:if="${not #lists.isEmpty(products)}">
+        <div class="col-md-4 col-sm-6" th:each="product : ${products}">
             <div class="card product-card">
                 <img th:src="${product.imageUrl}" class="card-img-top product-img" alt="Product Image"
                      th:attr="onerror=@{this.src='https://via.placeholder.com/300?text=No+Image'}">
@@ -74,10 +29,6 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="h5 text-primary">
                             $<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}">0.00</span>
-                            <span th:if="${product.discountPercentage > 0}" class="text-danger small ms-2">
-                                <del th:text="${'$' + #numbers.formatDecimal(product.originalPrice, 1, 2)}"></del>
-                                <span th:text="${'-' + product.discountPercentage + '%'}"></span>
-                            </span>
                         </span>
                         <span class="text-success">
                             <i class="fas fa-star"></i>
@@ -98,7 +49,6 @@
         </div>
     </div>
 
-
 </div>
 
 <!-- Include Footer -->
@@ -106,36 +56,5 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    function addToCart(productId) {
-        fetch('/api/cart/add/' + productId, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if(data.success) {
-                // Update cart count
-                const cartBadge = document.querySelector('.cart-badge');
-                if(cartBadge) {
-                    cartBadge.textContent = data.cartItemCount;
-                    cartBadge.style.display = 'inline-block';
-                }
-                // Show success message
-                alert('Product added to cart!');
-            } else {
-                alert(data.message || 'Failed to add to cart');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred');
-        });
-    }
-</script>
 </body>
 </html>

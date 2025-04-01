@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,8 +47,13 @@ public class AuthController {
             User user = userService.getUserByEmail(username);
             model.addAttribute("loggedInUser", user);
             model.addAttribute("role", role);
+        } catch (AuthenticationException e) {
+            System.out.println(e.getMessage());
+            model.addAttribute("error", e.getMessage());
+            return "auth/login";
         } catch (Exception e) {
-            model.addAttribute("error", "Invalid email or password");
+            System.out.println(e.getMessage());
+            model.addAttribute("error", e.getMessage());
             return "auth/login";
         }
 
@@ -83,7 +90,8 @@ public class AuthController {
     }
 
     @GetMapping("/profile")
-    public String profile(Model model, Authentication authentication) {
+    public String profile(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return "redirect:/login";
         }
@@ -95,6 +103,8 @@ public class AuthController {
             UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
             model.addAttribute("loggedInUser", userDTO);
         }
+
+        System.out.println("Model: " + model.asMap());
 
         return "auth/profile";
     }

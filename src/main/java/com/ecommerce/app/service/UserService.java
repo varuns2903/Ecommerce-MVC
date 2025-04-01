@@ -41,13 +41,18 @@ public class UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public UserDetails authenticateUser(String username, String password) {
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(username, password);
+    public UserDetails authenticateUser(String email, String password) {
+        try {
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(email, password);
 
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        return (UserDetails) authentication.getPrincipal();
+            return (UserDetails) authentication.getPrincipal();
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid email or password", e);
+        }
     }
+
 }

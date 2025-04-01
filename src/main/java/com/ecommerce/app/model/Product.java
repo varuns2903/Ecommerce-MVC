@@ -19,10 +19,10 @@ public class Product {
     private double price;
 
     @DBRef
-    private Category category;  // Reference to Category
+    private Category category;
 
     private int quantity;
-    private byte[] photoData;   // Store photo as byte array
+    private byte[] photoData;
     private String photoContentType;
     private boolean shipping;
 
