@@ -22,9 +22,7 @@ public class Product {
     private Category category;
 
     private int quantity;
-    private byte[] photoData;
-    private String photoContentType;
-    private boolean shipping;
+    private String photoURL;
 
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();

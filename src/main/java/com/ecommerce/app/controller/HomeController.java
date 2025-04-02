@@ -1,5 +1,6 @@
 package com.ecommerce.app.controller;
 
+import com.ecommerce.app.dto.UserDTO;
 import com.ecommerce.app.model.Category;
 import com.ecommerce.app.model.Product;
 import com.ecommerce.app.model.User;
@@ -46,10 +47,12 @@ public class HomeController {
         if (isAuthenticated) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof UserDetails userDetails) {
-                Optional<User> user = userRepository.findByEmail(userDetails.getUsername());
-                if (user.isPresent()) {
-                    model.addAttribute("loggedInUser", user.get());
-                    cartItemCount = cartService.getCartItemCount(user.get().getId());
+                Optional<User> userOptional = userRepository.findByEmail(userDetails.getUsername());
+                if (userOptional.isPresent()) {
+                    User user = userOptional.get();
+                    UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
+                    model.addAttribute("loggedInUser", userDTO);
+                    cartItemCount = cartService.getCartItemCount(user.getId());
                 }
             }
         }
