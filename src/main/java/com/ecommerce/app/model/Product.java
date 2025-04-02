@@ -2,7 +2,6 @@ package com.ecommerce.app.model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -18,8 +17,7 @@ public class Product {
     private String description;
     private double price;
 
-    @DBRef
-    private Category category;
+    private String categoryId;
 
     private int quantity;
     private String imageUrl;

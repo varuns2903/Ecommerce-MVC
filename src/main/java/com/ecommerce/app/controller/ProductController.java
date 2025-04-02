@@ -8,6 +8,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.List;
+
 @Controller
 public class ProductController {
 
@@ -17,7 +19,13 @@ public class ProductController {
     @GetMapping("/product/{id}")
     public String products(@PathVariable String id, Model model) {
         Product product = productService.getProductById(id);
+
+        List<Product> similarProducts = productService.getSimilarProducts(product.getCategoryId(), id);
+
         model.addAttribute("product", product);
+        model.addAttribute("similarProduct", similarProducts);
+
+        System.out.println("Model: " + model.asMap());
         return "product";
     }
 }

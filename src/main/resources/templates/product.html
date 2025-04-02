@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${product.name}">Product Name</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .product-image {
             max-height: 400px;
@@ -22,20 +23,29 @@
             color: red;
             font-weight: bold;
         }
+        .similar-product-img {
+            height: 150px;
+            object-fit: contain;
+        }
+        .similar-products-title {
+            border-bottom: 1px solid #e5e5e5;
+            padding-bottom: 10px;
+            margin: 30px 0 20px 0;
+        }
+        .similar-product-card {
+            transition: transform 0.3s;
+        }
+        .similar-product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
-<div class="container mt-5">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item" th:if="${product.category != null}">
-                <a th:href="@{'/category/' + ${product.category.slug}}" th:text="${product.category.name}">Category</a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page" th:text="${product.name}">Product Name</li>
-        </ol>
-    </nav>
+<!-- Include Navbar -->
+<div th:replace="~{components/navbar :: navbar}"></div>
 
+<div class="container mt-5">
     <div class="row">
         <!-- Product Image -->
         <div class="col-md-6 mb-4">
@@ -57,12 +67,6 @@
                 <span th:if="${product.quantity > 0 && product.quantity <= 10}" class="stock-limited" th:text="${'Only ' + product.quantity + ' left'}">Limited Stock</span>
                 <span th:if="${product.quantity <= 0}" class="stock-out">Out of Stock</span>
             </div>
-
-            <!-- Category -->
-            <p th:if="${product.category != null}">
-                <strong>Category:</strong>
-                <a th:href="@{'/category/' + ${product.category.slug}}" th:text="${product.category.name}">Category Name</a>
-            </p>
 
             <!-- Description -->
             <div class="mb-4">
@@ -95,7 +99,33 @@
             </div>
         </div>
     </div>
+
+    <!-- Similar Products Section -->
+    <h3 class="similar-products-title" th:if="${not #lists.isEmpty(similarProduct)}">Similar Products</h3>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" th:if="${not #lists.isEmpty(similarProduct)}">
+        <div class="col" th:each="similar : ${similarProduct}">
+            <a th:href="@{'/product/' + ${similar.id}}" class="text-decoration-none text-dark">
+                <div class="card h-100 similar-product-card">
+                    <img th:if="${similar.imageUrl != null}" th:src="${similar.imageUrl}" class="card-img-top similar-product-img" alt="Product Image">
+                    <img th:if="${similar.imageUrl == null}" src="/images/placeholder.jpg" class="card-img-top similar-product-img" alt="No Image Available">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${similar.name}">Similar Product Name</h5>
+                        <p class="card-text fw-bold" th:text="${'$' + #numbers.formatDecimal(similar.price, 1, 2)}">$0.00</p>
+                        <div>
+                            <!-- Similar Product Stock Status -->
+                            <span th:if="${similar.quantity > 10}" class="badge bg-success">In Stock</span>
+                            <span th:if="${similar.quantity > 0 && similar.quantity <= 10}" class="badge bg-warning text-dark" th:text="${similar.quantity + ' left'}">Limited</span>
+                            <span th:if="${similar.quantity <= 0}" class="badge bg-danger">Out of Stock</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
 </div>
+
+<!-- Include Footer -->
+<div th:replace="~{components/footer :: footer}"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
