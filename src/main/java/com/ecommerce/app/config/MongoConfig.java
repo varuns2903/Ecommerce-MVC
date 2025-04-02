@@ -10,7 +10,7 @@ import com.mongodb.client.MongoClients;
 @Configuration
 public class MongoConfig {
 
-    @Value("${spring.data.mongodb.uri}")
+    @Value("${MONGO_URL}")
     private String uri;
 
     @Bean
