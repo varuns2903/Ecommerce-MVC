@@ -1,4 +1,4 @@
-package com.ecommerce.app;
+ package com.ecommerce.app;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
