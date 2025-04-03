@@ -1,15 +1,12 @@
 package com.ecommerce.app.controller;
 
-import com.ecommerce.app.dto.UserDTO;
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -87,25 +84,5 @@ public class AuthController {
             e.printStackTrace();
         }
         return "redirect:/";
-    }
-
-    @GetMapping("/profile")
-    public String profile(Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return "redirect:/login";
-        }
-
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof UserDetails userDetails) {
-            User user = userService.getUserByEmail(userDetails.getUsername());
-
-            UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
-            model.addAttribute("loggedInUser", userDTO);
-        }
-
-        System.out.println("Model: " + model.asMap());
-
-        return "auth/profile";
     }
 }

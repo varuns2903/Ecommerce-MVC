@@ -30,7 +30,15 @@ public class ProductService {
 
     public List<Product> getSimilarProducts(String categoryId, String productId) {
         List<Product> products = productRepository.findByCategoryIdAndIdNot(categoryId, productId);
-        System.out.println("Found " + products.size() + " similar products");
         return products;
+    }
+
+    public List<Product> getProductsByCategory(String categoryId) {
+        List<Product> products = productRepository.findByCategoryId(categoryId);
+        return products;
+    }
+
+    public List<Product> searchProducts(String query) {
+        return productRepository.findByNameContainingIgnoreCase(query);
     }
 }

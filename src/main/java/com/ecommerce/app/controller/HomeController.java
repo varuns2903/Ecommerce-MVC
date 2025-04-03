@@ -15,11 +15,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import java.util.List;
 import java.util.Optional;
 
 @Controller
+@SessionAttributes("categories")
 public class HomeController {
 
     private final CategoryService categoryService;
@@ -65,5 +68,13 @@ public class HomeController {
         System.out.println("Model: " + model.asMap());
 
         return "home";
+    }
+
+    @GetMapping("/search")
+    public String searchProducts(@RequestParam("query") String query, Model model) {
+        List<Product> searchResults = productService.searchProducts(query);
+        model.addAttribute("products", searchResults);
+        model.addAttribute("query", query);
+        return "search-results";
     }
 }

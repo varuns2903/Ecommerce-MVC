@@ -45,7 +45,7 @@
 <!-- Include Navbar -->
 <div th:replace="~{components/navbar :: navbar}"></div>
 
-<div class="container mt-5">
+<div class="container-fluid mt-5">
     <div class="row">
         <!-- Product Image -->
         <div class="col-md-6 mb-4">
@@ -56,7 +56,7 @@
         </div>
 
         <!-- Product Details -->
-        <div class="col-md-6">
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 flex align-items-stretch">
             <h1 th:text="${product.name}">Product Name</h1>
 
             <div class="mb-3">

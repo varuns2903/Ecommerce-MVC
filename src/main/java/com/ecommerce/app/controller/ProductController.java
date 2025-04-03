@@ -1,6 +1,8 @@
 package com.ecommerce.app.controller;
 
+import com.ecommerce.app.model.Category;
 import com.ecommerce.app.model.Product;
+import com.ecommerce.app.service.CategoryService;
 import com.ecommerce.app.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +18,9 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private CategoryService categoryService;
+
     @GetMapping("/product/{id}")
     public String products(@PathVariable String id, Model model) {
         Product product = productService.getProductById(id);
@@ -25,7 +30,6 @@ public class ProductController {
         model.addAttribute("product", product);
         model.addAttribute("similarProduct", similarProducts);
 
-        System.out.println("Model: " + model.asMap());
         return "product";
     }
 }
