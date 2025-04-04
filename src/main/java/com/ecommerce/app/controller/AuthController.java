@@ -6,8 +6,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,36 +27,6 @@ public class AuthController {
         return "auth/login";
     }
 
-    @PostMapping("/login")
-    public String authenticateUser(@RequestParam("username") String username,
-                                   @RequestParam("password") String password,
-                                   Model model) {
-        try {
-            UserDetails userDetails = userService.authenticateUser(username, password);
-
-            String role = userDetails.getAuthorities().stream()
-                    .map(authority -> authority.getAuthority())
-                    .findFirst()
-                    .orElse("USER");
-
-            User user = userService.getUserByEmail(username);
-            model.addAttribute("loggedInUser", user);
-            model.addAttribute("role", role);
-        } catch (AuthenticationException e) {
-            System.out.println(e.getMessage());
-            model.addAttribute("error", e.getMessage());
-            return "auth/login";
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            model.addAttribute("error", e.getMessage());
-            return "auth/login";
-        }
-
-        System.out.println("Model: " + model.asMap());
-
-        return "redirect:/";
-    }
-
     @GetMapping("/register")
     public String register() {
         return "auth/register";
@@ -70,7 +38,6 @@ public class AuthController {
             userService.saveUser(user);
             return "redirect:/login";
         } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
             model.addAttribute("error", e.getMessage());
             return "auth/register";
         }

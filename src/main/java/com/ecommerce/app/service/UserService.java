@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
@@ -28,17 +30,21 @@ public class UserService {
     }
 
     public void saveUser(User user) {
-        if (userExists(user.getEmail())) {
-            throw new IllegalArgumentException("Email already exists");
+        if (user.getId() == null) {
+            if (userExists(user.getEmail())) {
+                throw new IllegalArgumentException("Email already exists");
+            }
+            if (user.getPassword() == null || user.getPassword().isEmpty()) {
+                throw new IllegalArgumentException("Password is required for new user");
+            }
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword())); // Ensure password is set before encoding
         userRepository.save(user);
     }
 
-
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     public UserDetails authenticateUser(String email, String password) {
@@ -54,5 +60,4 @@ public class UserService {
             throw new RuntimeException("Invalid email or password", e);
         }
     }
-
 }

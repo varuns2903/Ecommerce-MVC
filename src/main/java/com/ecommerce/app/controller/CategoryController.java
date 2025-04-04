@@ -23,9 +23,11 @@ public class CategoryController {
 
     @GetMapping("/category/{id}")
     public String getProductsByCategory(@PathVariable String id, Model model) {
+        List<Category> categories = categoryService.getAllCategories();
         Category category = categoryService.getCategoryById(id);
         List<Product> productsByCategory = productService.getProductsByCategory(id);
 
+        model.addAttribute("categories", categories);
         model.addAttribute("category", category);
         model.addAttribute("productsByCategory", productsByCategory);
         return "category";

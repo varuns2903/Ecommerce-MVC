@@ -5,6 +5,7 @@ import com.ecommerce.app.repository.CartRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -22,5 +23,14 @@ public class CartService {
             }
         }
         return 0;
+    }
+
+    public Cart getCartByUser(String userId) {
+        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
+        if (cartOptional.isPresent()) {
+            Cart cart = cartOptional.get();
+            return cart;
+        }
+        return null;
     }
 }

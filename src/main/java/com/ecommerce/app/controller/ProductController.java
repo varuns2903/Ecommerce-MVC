@@ -23,10 +23,12 @@ public class ProductController {
 
     @GetMapping("/product/{id}")
     public String products(@PathVariable String id, Model model) {
+        List<Category> categories = categoryService.getAllCategories();
         Product product = productService.getProductById(id);
 
         List<Product> similarProducts = productService.getSimilarProducts(product.getCategoryId(), id);
 
+        model.addAttribute("categories", categories);
         model.addAttribute("product", product);
         model.addAttribute("similarProduct", similarProducts);
 

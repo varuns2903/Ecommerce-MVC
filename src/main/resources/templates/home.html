@@ -33,13 +33,13 @@
                     <!-- Spacer to push buttons to bottom -->
                     <div class="mt-auto">
                         <div class="d-grid gap-2">
-                            <button class="btn btn-primary add-to-cart-btn"
+                            <button class="btn btn-dark add-to-cart-btn"
                                     type="button"
                                     th:data-product-id="${product.id}">
                                 <i class="fas fa-cart-plus me-2"></i> Add to Cart
                             </button>
                             <a th:href="@{/product/{id}(id=${product.id})}"
-                               class="btn btn-outline-success">
+                               class="btn btn-outline-dark">
                                 <i class="fas fa-bolt me-2"></i> Buy Now
                             </a>
                         </div>

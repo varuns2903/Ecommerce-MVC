@@ -9,13 +9,13 @@
         function validatePassword() {
             let password = document.getElementById("password").value;
             let confirmPassword = document.getElementById("confirmPassword").value;
-            let errorMessage = document.getElementById("passwordError");
+            let error = document.getElementById("passwordError");
 
             if (password !== confirmPassword) {
-                errorMessage.textContent = "Passwords do not match!";
+                error.textContent = "Passwords do not match!";
                 return false;
             } else {
-                errorMessage.textContent = "";
+                error.textContent = "";
                 return true;
             }
         }
@@ -27,6 +27,9 @@
         <div class="col-md-6">
             <div class="card shadow-lg p-4">
                 <h2 class="text-center mb-4">Register</h2>
+
+                <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
                 <form th:action="@{/register}" method="post" onsubmit="return validatePassword()">
                     <div class="mb-3">
                         <label class="form-label">Full Name</label>
