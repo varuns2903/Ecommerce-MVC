@@ -66,10 +66,30 @@ public class HomeController {
 
     @GetMapping("/search")
     public String searchProducts(@RequestParam("query") String query, Model model) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
+
+        int cartItemCount = 0;
+
+        if (isAuthenticated) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof CustomUserDetail userDetails) {
+                Optional<User> userOptional = userService.getUserByEmail(userDetails.getUsername());
+                if (userOptional.isPresent()) {
+                    User user = userOptional.get();
+                    UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
+                    model.addAttribute("loggedInUser", userDTO);
+                    cartItemCount = cartService.getCartItemCount(user.getId());
+                }
+            }
+        }
+
         List<Category> categories = categoryService.getAllCategories();
         List<Product> searchResults = productService.searchProducts(query);
         model.addAttribute("categories", categories);
         model.addAttribute("products", searchResults);
+        model.addAttribute("cartItemCount", cartItemCount);
         model.addAttribute("query", query);
         return "search-results";
     }

@@ -7,27 +7,45 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
-    .sidebar { /* Same as dashboard */
+    .sidebar {
         height: 100%;
         background-color: #f8f9fa;
         padding: 20px 0;
     }
-    .sidebar-link { /* Same as dashboard */
+    .sidebar-link {
         padding: 10px 15px;
         display: block;
         color: #212529;
         text-decoration: none;
         border-left: 3px solid transparent;
     }
-    .sidebar-link:hover, .sidebar-link.active { /* Same as dashboard */
+    .sidebar-link:hover, .sidebar-link.active {
         background-color: #e9ecef;
         border-left: 3px solid #0d6efd;
     }
-    .sidebar-link i { /* Same as dashboard */
+    .sidebar-link i {
         margin-right: 10px;
     }
     .main-content {
         padding: 20px;
+    }
+    .cart-card {
+        border: 1px solid #e9ecef;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        background-color: white;
+    }
+    .cart-item-img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+    .quantity-input-group {
+        width: 120px;
+    }
+    .quantity-input {
+        text-align: center;
     }
   </style>
 </head>
@@ -62,51 +80,83 @@
     <div class="col-md-9 col-lg-10 main-content">
       <h2 class="mb-4">Shopping Cart</h2>
 
-      <div th:if="${cart != null && cart.cartItems != null && !cart.cartItems.isEmpty()}">
-        <div class="table-responsive">
-          <table class="table table-hover">
-            <thead>
-            <tr>
-              <th>Product</th>
-              <th>Price</th>
-              <th>Quantity</th>
-              <th>Total</th>
-              <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="item : ${cart.cartItems}">
-              <td th:text="${item.product.name}"></td>
-              <td th:text="${'$' + item.product.price}"></td>
-              <td>
-                <input type="number" class="form-control w-25 d-inline"
-                       th:value="${item.quantity}"
-                       th:field="${item.quantity}"
-                       min="1">
-              </td>
-              <td th:text="${'$' + (item.product.price * item.quantity)}"></td>
-              <td>
-                <a th:href="@{'/cart/remove/' + ${item.id}}" class="btn btn-sm btn-danger">
+      <form id="cartForm" th:action="@{/cart/update}" method="post">
+        <div th:if="${cart != null && cart.items != null && !cart.items.isEmpty()}">
+          <div th:each="item : ${cart.items}" class="cart-card">
+            <div class="row p-3 align-items-center">
+              <div class="col-md-2">
+                <img th:src="${item.product.imageUrl != null ? item.product.imageUrl : '/images/default-product.jpg'}"
+                     alt="Product Image"
+                     class="cart-item-img">
+              </div>
+              <div class="col-md-4">
+                <h5 th:text="${item.product.name}" class="mb-1"></h5>
+                <small class="text-muted" th:if="${item.product.description}"
+                       th:text="${#strings.abbreviate(item.product.description, 50)}"></small>
+              </div>
+              <div class="col-md-2">
+                <p class="mb-0" th:text="${'$' + item.product.price}"></p>
+              </div>
+              <div class="col-md-2">
+                <div class="input-group quantity-input-group" th:data-product-id="${item.product.id}">
+                  <button class="btn btn-outline-secondary decrease-btn" type="button">-</button>
+                  <input type="number"
+                         class="form-control quantity-input"
+                         th:value="${item.quantity}"
+                         th:data-original="${item.quantity}"
+                         min="1"
+                         th:name="'quantity_' + ${item.product.id}">
+                  <button class="btn btn-outline-secondary increase-btn" type="button">+</button>
+                </div>
+              </div>
+              <div class="col-md-2 d-flex justify-content-between align-items-center">
+                <strong th:text="${'$' + (item.product.price * item.quantity)}"></strong>
+                <button type="button"
+                        class="btn btn-sm btn-danger remove-btn"
+                        th:data-product-id="${item.product.id}"
+                        th:data-product-name="${item.product.name}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#removeConfirmModal">
                   <i class="fas fa-trash"></i>
-                </a>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="d-flex justify-content-between mt-4">
-          <div>
-            <h5>Total: <span th:text="${'$' + cart.totalPrice}"></span></h5>
+                </button>
+              </div>
+            </div>
           </div>
-          <div>
-            <a th:href="@{/checkout}" class="btn btn-primary">Proceed to Checkout</a>
-          </div>
-        </div>
-      </div>
 
-      <div th:unless="${cart != null && cart.cartItems != null && !cart.cartItems.isEmpty()}"
-           class="alert alert-info">
-        Your cart is empty.
+          <div class="card p-3 mt-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <h4 class="mb-0">Total: <span th:text="${'$' + cart.totalPrice}"></span></h4>
+              <div>
+                <button type="submit" class="btn btn-success me-2" id="updateCartBtn" disabled>Update Cart</button>
+                <a th:href="@{/checkout}" class="btn btn-primary btn-lg">Proceed to Checkout</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div th:unless="${cart != null && cart.items != null && !cart.items.isEmpty()}"
+             class="alert alert-info">
+          Your cart is empty.
+        </div>
+      </form>
+
+      <!-- Remove Confirmation Modal -->
+      <div class="modal fade" id="removeConfirmModal" tabindex="-1" aria-labelledby="removeConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="removeConfirmModalLabel">Confirm Removal</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              Are you sure you want to remove "<span id="productName"></span>" from your cart?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <a id="confirmRemoveBtn" href="#" class="btn btn-danger">Remove</a>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -114,5 +164,85 @@
 
 <div th:replace="~{components/footer :: footer}"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.querySelectorAll('.decrease-btn').forEach(button => {
+      button.addEventListener('click', function() {
+          updateQuantity(this, -1);
+      });
+  });
+
+  document.querySelectorAll('.increase-btn').forEach(button => {
+      button.addEventListener('click', function() {
+          updateQuantity(this, 1);
+      });
+  });
+
+  document.querySelectorAll('.remove-btn').forEach(button => {
+      button.addEventListener('click', function() {
+          const productId = this.getAttribute('data-product-id');
+          const productName = this.getAttribute('data-product-name');
+
+          // Update modal content
+          document.getElementById('productName').textContent = productName;
+          document.getElementById('confirmRemoveBtn').href = `/cart/remove/${productId}`;
+      });
+  });
+
+  function updateQuantity(button, change) {
+      const inputGroup = button.closest('.quantity-input-group');
+      const productId = inputGroup.getAttribute('data-product-id');
+      const input = inputGroup.querySelector('input');
+      let value = parseInt(input.value);
+      value += change;
+      if (value < 1) value = 1;
+      input.value = value;
+
+      const priceElement = button.closest('.cart-card').querySelector('.col-md-2 p');
+      const price = parseFloat(priceElement.textContent.replace('$', ''));
+      const totalElement = button.closest('.cart-card').querySelector('strong');
+      totalElement.textContent = '$' + (price * value).toFixed(2);
+
+      updateCartTotal();
+      checkCartChanges();
+  }
+
+  function updateCartTotal() {
+      const totals = document.querySelectorAll('.cart-card strong');
+      let cartTotal = 0;
+      totals.forEach(total => {
+          cartTotal += parseFloat(total.textContent.replace('$', ''));
+      });
+      document.querySelector('.card h4 span').textContent = '$' + cartTotal.toFixed(2);
+  }
+
+  function checkCartChanges() {
+      const inputs = document.querySelectorAll('.quantity-input');
+      let hasChanges = false;
+
+      inputs.forEach(input => {
+          const currentValue = parseInt(input.value);
+          const originalValue = parseInt(input.getAttribute('data-original'));
+          if (currentValue !== originalValue) {
+              hasChanges = true;
+          }
+      });
+
+      const updateButton = document.getElementById('updateCartBtn');
+      updateButton.disabled = !hasChanges;
+  }
+
+  document.querySelectorAll('.quantity-input').forEach(input => {
+      input.addEventListener('change', function() {
+          if (this.value < 1) this.value = 1;
+          const priceElement = this.closest('.cart-card').querySelector('.col-md-2 p');
+          const price = parseFloat(priceElement.textContent.replace('$', ''));
+          const totalElement = this.closest('.cart-card').querySelector('strong');
+          totalElement.textContent = '$' + (price * this.value).toFixed(2);
+
+          updateCartTotal();
+          checkCartChanges();
+      });
+  });
+</script>
 </body>
 </html>

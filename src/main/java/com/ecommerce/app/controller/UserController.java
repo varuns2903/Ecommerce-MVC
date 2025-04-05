@@ -113,7 +113,7 @@ public class UserController {
         Optional<User> userOptional = userService.getUserByEmail(username);
         if (!userOptional.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "User not found.");
-            return "redirect:/dashboard";
+            return "redirect:/login";
         }
 
         User user = userOptional.get();
@@ -133,64 +133,6 @@ public class UserController {
 
         redirectAttributes.addFlashAttribute("success", "Password updated successfully.");
         return "redirect:/dashboard";
-    }
-
-    @GetMapping("/orders")
-    public String userOrders(Model model) {
-        List<Category> categories = categoryService.getAllCategories();
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
-
-        int cartItemCount = 0;
-
-        if (isAuthenticated) {
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof CustomUserDetail userDetails) {
-                Optional<User> userOptional = userService.getUserByEmail(userDetails.getUsername());
-                if (userOptional.isPresent()) {
-                    User user = userOptional.get();
-                    UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
-                    model.addAttribute("loggedInUser", userDTO);
-                    cartItemCount = cartService.getCartItemCount(user.getId());
-                    model.addAttribute("cartItemCount", cartItemCount);
-                    List<Order> orders = orderService.getOrdersByUser(user.getId());
-                    model.addAttribute("orders", orders);
-                }
-            }
-        }
-
-        model.addAttribute("categories", categories);
-
-        return "user/orders";
-    }
-
-    @GetMapping("/cart")
-    public String userCart(Model model) {
-        List<Category> categories = categoryService.getAllCategories();
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
-
-        int cartItemCount = 0;
-
-        if (isAuthenticated) {
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof CustomUserDetail userDetails) {
-                Optional<User> userOptional = userService.getUserByEmail(userDetails.getUsername());
-                if (userOptional.isPresent()) {
-                    User user = userOptional.get();
-                    UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
-                    model.addAttribute("loggedInUser", userDTO);
-                    Cart cart = cartService.getCartByUser(user.getId());
-                    model.addAttribute("cart", cart);
-                    cartItemCount = cartService.getCartItemCount(user.getId());
-                    model.addAttribute("cartItemCount", cartItemCount);
-                }
-            }
-        }
-
-        model.addAttribute("categories", categories);
-
-        return "user/cart";
     }
 
     /*@GetMapping("/wishlist")

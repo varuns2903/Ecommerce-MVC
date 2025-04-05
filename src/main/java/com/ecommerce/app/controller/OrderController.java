@@ -2,7 +2,7 @@ package com.ecommerce.app.controller;
 
 import com.ecommerce.app.dto.UserDTO;
 import com.ecommerce.app.model.Category;
-import com.ecommerce.app.model.Product;
+import com.ecommerce.app.model.Order;
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,29 +11,28 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Optional;
 
 @Controller
-public class ProductController {
-
-    @Autowired
-    private ProductService productService;
-
-    @Autowired
-    private CategoryService categoryService;
+public class OrderController {
 
     @Autowired
     private UserService userService;
 
     @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
     private CartService cartService;
 
-    @GetMapping("/product/{id}")
-    public String products(@PathVariable String id, Model model) {
+    @Autowired
+    private OrderService orderService;
 
+    @GetMapping("/orders")
+    public String userOrders(Model model) {
+        List<Category> categories = categoryService.getAllCategories();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
 
@@ -48,21 +47,15 @@ public class ProductController {
                     UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
                     model.addAttribute("loggedInUser", userDTO);
                     cartItemCount = cartService.getCartItemCount(user.getId());
+                    model.addAttribute("cartItemCount", cartItemCount);
+                    List<Order> orders = orderService.getOrdersByUser(user.getId());
+                    model.addAttribute("orders", orders);
                 }
             }
         }
 
-        List<Category> categories = categoryService.getAllCategories();
-        Product product = productService.getProductById(id);
-
-        List<Product> similarProducts = productService.getSimilarProducts(product.getCategoryId(), id);
-
         model.addAttribute("categories", categories);
-        model.addAttribute("cartItemCount", cartItemCount);
-        model.addAttribute("product", product);
-        model.addAttribute("similarProduct", similarProducts);
 
-        return "product-details";
+        return "user/orders";
     }
-
 }

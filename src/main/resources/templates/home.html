@@ -32,17 +32,20 @@
 
                     <!-- Spacer to push buttons to bottom -->
                     <div class="mt-auto">
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-dark add-to-cart-btn"
-                                    type="button"
-                                    th:data-product-id="${product.id}">
-                                <i class="fas fa-cart-plus me-2"></i> Add to Cart
-                            </button>
+                        <div class="d-grid">
+                            <form th:action="@{/cart/add}" method="post" class="mb-1">
+                                <input type="hidden" name="productId" th:value="${product.id}" />
+                                <button type="submit" class="btn btn-dark add-to-cart-btn w-100">
+                                    <i class="fas fa-cart-plus me-2"></i> Add to Cart
+                                </button>
+                            </form>
+
                             <a th:href="@{/product/{id}(id=${product.id})}"
-                               class="btn btn-outline-dark">
+                               class="btn btn-outline-dark w-100">
                                 <i class="fas fa-bolt me-2"></i> Buy Now
                             </a>
                         </div>
+
                     </div>
                 </div>
             </div>
