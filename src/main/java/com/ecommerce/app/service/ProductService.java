@@ -22,7 +22,6 @@ public class ProductService {
 
     public List<Product> getAllProducts() {
         List<Product> products = productRepository.findAll();
-        Collections.shuffle(products);
         return products;
     }
 
@@ -32,19 +31,16 @@ public class ProductService {
 
     public List<Product> getSimilarProducts(String categoryId, String productId) {
         List<Product> products = productRepository.findByCategoryIdAndIdNot(categoryId, productId);
-        Collections.shuffle(products);
         return products;
     }
 
     public List<Product> getProductsByCategory(String categoryId) {
         List<Product> products = productRepository.findByCategoryId(categoryId);
-        Collections.shuffle(products);
         return products;
     }
 
     public List<Product> searchProducts(String query) {
         List<Product> products = productRepository.findByNameContainingIgnoreCase(query);
-        Collections.shuffle(products);
         return products;
     }
 }

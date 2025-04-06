@@ -3,7 +3,6 @@ package com.ecommerce.app.controller;
 import com.ecommerce.app.dto.UserDTO;
 import com.ecommerce.app.model.Cart;
 import com.ecommerce.app.model.Order;
-import com.ecommerce.app.model.ProductItem;
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.service.CartService;
 import com.ecommerce.app.service.CustomUserDetail;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -165,7 +163,6 @@ public class PaymentController {
 
         Order order = orderService.findById(orderId);
         if (order != null && order.getStatus() == Order.OrderStatus.NOT_PROCESS) {
-            order.setStatus(Order.OrderStatus.PROCESSING);
             orderService.save(order);
 
             cartService.clearCart(order.getUserId());

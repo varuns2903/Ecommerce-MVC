@@ -23,12 +23,14 @@ public class HomeController {
     private final ProductService productService;
     private final UserService userService;
     private final CartService cartService;
+    private final WishlistService wishlistService;
 
-    public HomeController(CategoryService categoryService, ProductService productService, UserService userService, CartService cartService) {
+    public HomeController(CategoryService categoryService, ProductService productService, UserService userService, CartService cartService, WishlistService wishlistService) {
         this.categoryService = categoryService;
         this.productService = productService;
         this.userService = userService;
         this.cartService = cartService;
+        this.wishlistService = wishlistService;
     }
 
     @GetMapping("/")
@@ -50,8 +52,12 @@ public class HomeController {
                     UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
                     model.addAttribute("loggedInUser", userDTO);
                     cartItemCount = cartService.getCartItemCount(user.getId());
+                    List<String> wishlistProductIds = wishlistService.getUserWishlist(user.getId()).getProducts().stream().map(Product::getId).toList();
+                    model.addAttribute("wishlistProductIds", wishlistProductIds);
                 }
             }
+        } else {
+            model.addAttribute("wishlistProductIds", null);
         }
 
         model.addAttribute("categories", categories);

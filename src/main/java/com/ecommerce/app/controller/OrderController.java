@@ -11,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,5 +58,11 @@ public class OrderController {
         model.addAttribute("categories", categories);
 
         return "user/orders";
+    }
+
+    @GetMapping("/orders/{id}")
+    public String orderDetails(@PathVariable String orderId) {
+
+        return "user/order-details";
     }
 }
