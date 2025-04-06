@@ -1,19 +1,67 @@
 package com.ecommerce.app.service;
 
 import com.ecommerce.app.model.Order;
+import com.ecommerce.app.model.ProductItem;
+import com.ecommerce.app.model.User;
 import com.ecommerce.app.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
+    public Order save(Order order) {
+        return orderRepository.save(order);
+    }
+
+    public Order findById(String id) {
+        return orderRepository.findById(id).get();
+    }
+
     public List<Order> getOrdersByUser(String userId) {
         List<Order> orders = orderRepository.findByUserId(userId);
         return orders;
+    }
+
+    public Order getOrderById(String id) {
+        return orderRepository.findById(id).get();
+    }
+
+    public Order createOrder(User user, List<ProductItem> items, String address) {
+        Order order = new Order();
+        order.setUserId(user.getId());
+        order.setItems(items);
+        order.setAddress(address);
+        order.setStatus(Order.OrderStatus.NOT_PROCESS);
+        order.setCreatedAt(LocalDateTime.now());
+
+        return orderRepository.save(order);
+    }
+
+    public void updateOrderStatus(String id, String status) {
+        Optional<Order> optionalOrder = orderRepository.findById(id);
+        if (optionalOrder.isPresent()) {
+            Order order = optionalOrder.get();
+
+            try {
+                Order.OrderStatus newStatus = Order.OrderStatus.valueOf(status.toUpperCase());
+                order.setStatus(newStatus);
+                orderRepository.save(order);
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid order status: " + status);
+            }
+        } else {
+            throw new RuntimeException("Order not found with ID: " + id);
+        }
+    }
+
+    public void deleteById(String id) {
+        orderRepository.deleteById(id);
     }
 }

@@ -15,10 +15,11 @@ public class Order {
 
     private String userId;
     private List<ProductItem> items;
+    private String address;
     private OrderStatus status = OrderStatus.NOT_PROCESS;
 
     public enum OrderStatus {
-        NOT_PROCESS, PROCESSING, SHIPPED, OUT_FOR_DELIVERY, DELIVERED, CANCEL
+        NOT_PROCESS, PROCESSING, SHIPPED, OUT_FOR_DELIVERY, DELIVERED, CANCELLED
     }
     private LocalDateTime createdAt = LocalDateTime.now();
 

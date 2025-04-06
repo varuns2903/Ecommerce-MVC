@@ -87,4 +87,11 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
+    public void clearCart(String userId) {
+        Optional<Cart> cartOptional = cartRepository.findByUserId(userId);
+        cartOptional.ifPresent(cart -> {
+            cart.getItems().clear();
+            cartRepository.save(cart);
+        });
+    }
 }

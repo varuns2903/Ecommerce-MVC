@@ -76,21 +76,26 @@
           <tbody>
           <tr th:each="order : ${orders}">
             <td th:text="${order.id}"></td>
-            <td th:text="${#temporals.format(order.orderDate, 'dd-MM-yyyy')}"></td>
-            <td th:text="${'$' + order.totalPrice}"></td>
+            <td th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy')}"></td>
+            <td th:text="'$' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}"></td>
             <td>
-                                <span class="badge" th:classappend="${
-                                    order.status == 'PENDING' ? 'bg-warning' :
-                                    order.status == 'PROCESSING' ? 'bg-info' :
-                                    order.status == 'SHIPPED' ? 'bg-primary' :
-                                    order.status == 'DELIVERED' ? 'bg-success' :
-                                    order.status == 'CANCELLED' ? 'bg-danger' : 'bg-secondary'
-                                }" th:text="${order.status}"></span>
+              <span class="badge"
+                    th:classappend="${
+                      order.status.name() == 'NOT_PROCESS' ? ' bg-warning' :
+                      order.status.name() == 'PROCESSING' ? ' bg-info' :
+                      order.status.name() == 'SHIPPED' ? ' bg-primary' :
+                      order.status.name() == 'OUT_FOR_DELIVERY' ? ' bg-secondary' :
+                      order.status.name() == 'DELIVERED' ? ' bg-success' :
+                      order.status.name() == 'CANCEL' ? ' bg-danger' : ' bg-light'
+                    }"
+                    th:text="${order.status}"></span>
+
             </td>
             <td>
               <a th:href="@{'/orders/' + ${order.id}}" class="btn btn-sm btn-outline-primary">View Details</a>
             </td>
           </tr>
+
           </tbody>
         </table>
       </div>

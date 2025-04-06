@@ -32,19 +32,16 @@ public class CategoryController {
     private UserService userService;
 
     @GetMapping("/category/{id}")
-    public String getProductsByCategory(@PathVariable String id, Model model, RedirectAttributes redirectAttributes) {
+    public String getProductsByCategory(@PathVariable String id, Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
 
         Optional<User> userOptional = userService.getUserByEmail(username);
-        if (!userOptional.isPresent()) {
-            redirectAttributes.addFlashAttribute("error", "User not found.");
-            return "redirect:/login";
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
+            model.addAttribute("loggedInUser", userDTO);
         }
-
-        User user = userOptional.get();
-        UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
-        model.addAttribute("loggedInUser", userDTO);
 
         List<Category> categories = categoryService.getAllCategories();
         Category category = categoryService.getCategoryById(id);

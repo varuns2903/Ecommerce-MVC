@@ -5,6 +5,7 @@ import com.ecommerce.app.model.Cart;
 import com.ecommerce.app.model.Category;
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.service.*;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -63,7 +64,8 @@ public class CartController {
     }
 
     @PostMapping("/cart/add")
-    public String addToCart(@RequestParam("productId") String productId) {
+    public String addToCart(@RequestParam("productId") String productId,
+                            HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
             return "redirect:/login";
@@ -72,14 +74,13 @@ public class CartController {
         Object principal = authentication.getPrincipal();
         if (principal instanceof CustomUserDetail userDetails) {
             Optional<User> userOptional = userService.getUserByEmail(userDetails.getUsername());
-            if (userOptional.isPresent()) {
-                User user = userOptional.get();
-                cartService.addProductToCart(user.getId(), productId);
-            }
+            userOptional.ifPresent(user -> cartService.addProductToCart(user.getId(), productId));
         }
 
-        return "redirect:/";
+        String referer = request.getHeader("Referer");
+        return "redirect:" + referer;
     }
+
 
     @PostMapping("/cart/update")
     public String updateCart(@RequestParam Map<String, String> allParams, Model model, RedirectAttributes redirectAttributes) {
