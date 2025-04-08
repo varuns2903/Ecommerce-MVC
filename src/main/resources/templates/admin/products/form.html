@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div th:fragment="content" class="container mt-4">
+    <h2 class="mb-4" th:text="${product.id != null} ? 'Edit Product' : 'Add Product'"></h2>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <form th:action="@{/admin/products}" th:object="${product}" method="post">
+        <input type="hidden" th:if="${product.id != null}" th:field="*{id}" />
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" th:field="*{name}" required/>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" th:field="*{description}" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="price" class="form-label">Price</label>
+            <input type="number" step="0.01" class="form-control" id="price" th:field="*{price}" required/>
+        </div>
+        <div class="mb-3">
+            <label for="categoryId" class="form-label">Category</label>
+            <select class="form-select" id="categoryId" th:field="*{categoryId}" required>
+                <option value="">Select Category</option>
+                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="quantity" class="form-label">Quantity</label>
+            <input type="number" class="form-control" id="quantity" th:field="*{quantity}" required/>
+        </div>
+        <div class="mb-3">
+            <label for="imageUrl" class="form-label">Product Image</label>
+            <input type="hidden" role="uploadcare-uploader" data-clearable data-crop="16:9" data-images-only name="imageUrl" id="imageUrl" th:field="*{imageUrl}" />
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a th:href="@{/admin/products}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+<script>
+    UPLOADCARE_PUBLIC_KEY = 'aa023cd11318b4addc5a';
+</script>
+<script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
+<script>
+    uploadcare.registerTab('preview', uploadcareTabEffects);
+</script>
+</body>
+</html>

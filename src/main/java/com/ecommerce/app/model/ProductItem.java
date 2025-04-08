@@ -14,10 +14,12 @@ public class ProductItem {
     private double price;
     private double totalPrice;
 
+
     public ProductItem(Product product, int quantity) {
         this.product = product;
         this.quantity = quantity;
         this.price = product.getPrice();
         this.totalPrice = this.price * this.quantity;
     }
+
 }

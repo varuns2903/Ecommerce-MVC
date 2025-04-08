@@ -6,6 +6,8 @@ import com.ecommerce.app.repository.CategoryRepository;
 import com.ecommerce.app.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+
 
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +28,8 @@ public class ProductService {
     }
 
     public Product getProductById(String id) {
-        return productRepository.findById(id).get();
+        return productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + id));
     }
 
     public List<Product> getSimilarProducts(String categoryId, String productId) {
@@ -42,5 +45,37 @@ public class ProductService {
     public List<Product> searchProducts(String query) {
         List<Product> products = productRepository.findByNameContainingIgnoreCase(query);
         return products;
+    }
+
+
+    //Admin Part
+
+    public Product createProduct(Product product) {
+        product.setSlug(generateSlug(product.getName()));
+        product.setCreatedAt(LocalDateTime.now());
+        product.setUpdatedAt(LocalDateTime.now());
+        return productRepository.save(product);
+    }
+
+    public Product updateProduct(String id, Product updatedProduct) {
+        Product product = getProductById(id);
+        product.setName(updatedProduct.getName());
+        product.setSlug(generateSlug(updatedProduct.getName())); // Generate slug from name
+        product.setDescription(updatedProduct.getDescription());
+        product.setPrice(updatedProduct.getPrice());
+        product.setCategoryId(updatedProduct.getCategoryId());
+        product.setQuantity(updatedProduct.getQuantity());
+        product.setImageUrl(updatedProduct.getImageUrl());
+        product.setUpdatedAt(LocalDateTime.now());
+        return productRepository.save(product);
+    }
+
+    public void deleteProduct(String id) {
+        productRepository.deleteById(id);
+    }
+
+    private String generateSlug(String name) {
+        if (name == null) return "";
+        return name.toLowerCase().replaceAll("\\s+", "-");
     }
 }

@@ -64,4 +64,15 @@ public class OrderService {
     public void deleteById(String id) {
         orderRepository.deleteById(id);
     }
+
+    public Order updateOrder(String id, Order updatedOrder) {
+        Order order = findById(id);
+        order.setStatus(updatedOrder.getStatus());
+        return orderRepository.save(order);
+    }
+
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
 }
