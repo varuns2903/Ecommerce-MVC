@@ -2,7 +2,6 @@ package com.ecommerce.app.controller;
 
 import com.ecommerce.app.dto.UserDTO;
 import com.ecommerce.app.model.Cart;
-import com.ecommerce.app.model.Category;
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.service.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,7 +34,6 @@ public class CartController {
 
     @GetMapping("/cart")
     public String userCart(Model model) {
-        List<Category> categories = categoryService.getAllCategories();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
 
@@ -58,7 +55,9 @@ public class CartController {
             }
         }
 
-        model.addAttribute("categories", categories);
+        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
+        if(isAdmin)
+            return "admin/cart";
 
         return "user/cart";
     }
@@ -136,6 +135,46 @@ public class CartController {
             model.addAttribute("error", "Failed to remove item: " + e.getMessage());
             return "redirect:/cart";
         }
+    }
+
+    @GetMapping("/cart/increase/{productId}")
+    public String increaseQuantity(@PathVariable("productId") String productId, RedirectAttributes redirectAttributes) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        Optional<User> userOptional = userService.getUserByEmail(username);
+
+        if (!userOptional.isPresent()) {
+            redirectAttributes.addFlashAttribute("error", "User not found.");
+            return "redirect:/login";
+        }
+
+        User user = userOptional.get();
+
+        cartService.addProductToCart(user.getId(), productId);
+
+        return "redirect:/cart";
+    }
+
+    @GetMapping("/cart/decrease/{productId}")
+    public String decreaseQuantity(@PathVariable("productId") String productId, Model model, RedirectAttributes redirectAttributes) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        Optional<User> userOptional = userService.getUserByEmail(username);
+
+        if (!userOptional.isPresent()) {
+            redirectAttributes.addFlashAttribute("error", "User not found.");
+            return "redirect:/login";
+        }
+
+        User user = userOptional.get();
+
+        Cart updatedCart = cartService.decreaseQuantity(user.getId(), productId);
+        model.addAttribute("cart", updatedCart);
+        model.addAttribute("cartItemCount", updatedCart.getItems().size());
+
+        return "redirect:/cart";
     }
 
 }

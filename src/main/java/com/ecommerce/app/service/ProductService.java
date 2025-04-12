@@ -71,7 +71,9 @@ public class ProductService {
     }
 
     public void deleteProduct(String id) {
-        productRepository.deleteById(id);
+        Product product = getProductById(id);
+        product.setQuantity(0);
+        productRepository.save(product);
     }
 
     private String generateSlug(String name) {

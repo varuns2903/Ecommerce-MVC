@@ -41,7 +41,6 @@ public class UserController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        List<Category> categories = categoryService.getAllCategories();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
 
@@ -60,8 +59,6 @@ public class UserController {
                 }
             }
         }
-
-        model.addAttribute("categories", categories);
 
         return "user/dashboard";
     }
@@ -134,31 +131,4 @@ public class UserController {
         redirectAttributes.addFlashAttribute("success", "Password updated successfully.");
         return "redirect:/dashboard";
     }
-
-    /*@GetMapping("/wishlist")
-    public String userWishlist(Model model) {
-    List<Category> categories = categoryService.getAllCategories();
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
-
-        int cartItemCount = 0;
-
-        if (isAuthenticated) {
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof CustomUserDetail userDetails) {
-                Optional<User> userOptional = userService.getUserByEmail(userDetails.getUsername());
-                if (userOptional.isPresent()) {
-                    User user = userOptional.get();
-                    UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
-                    model.addAttribute("loggedInUser", userDTO);
-                    cartItemCount = cartService.getCartItemCount(user.getId());
-                    model.addAttribute("cartItemCount", cartItemCount);
-                }
-            }
-        }
-
-        model.addAttribute("categories", categories);
-
-        return "user/wishlist";
-    }*/
 }

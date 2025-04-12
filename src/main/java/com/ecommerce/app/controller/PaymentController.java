@@ -57,15 +57,7 @@ public class PaymentController {
             return "redirect:/cart";
         }
 
-        int cartItemCount = 0;
-
-        UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
-        model.addAttribute("loggedInUser", userDTO);
-
-        cartItemCount = cartService.getCartItemCount(user.getId());
-
         model.addAttribute("cart", cart);
-        model.addAttribute("cartItemCount", cartItemCount);
         model.addAttribute("address", user.getAddress()); // Optional: preload saved address
         return "user/checkout";
     }
@@ -96,16 +88,7 @@ public class PaymentController {
             return "redirect:/cart";
         }
 
-        // 1. Create new Order with NOT_PROCESS status
-        Order order = new Order();
-        order.setUserId(user.getId());
-        order.setAddress(address);
-        order.setItems(cart.getItems());
-        order.setStatus(Order.OrderStatus.NOT_PROCESS);
-        order.setCreatedAt(LocalDateTime.now());
-
-        // Save order to get order ID
-        order = orderService.save(order);
+        Order order = orderService.createOrder(user, cart.getItems(), address);
 
         // 2. Prepare Stripe Line Items
         List<SessionCreateParams.LineItem> lineItems = cart.getItems().stream()
@@ -131,10 +114,11 @@ public class PaymentController {
 
         Session session = Session.create(params);
 
+        orderService.save(order);
+
         // Redirect to Stripe checkout page
         return "redirect:" + session.getUrl();
     }
-
 
     @GetMapping("/payment/success")
     public String paymentSuccess(@RequestParam("orderId") String orderId, Model model, Authentication authentication) {
@@ -153,16 +137,11 @@ public class PaymentController {
             return "redirect:/cart";
         }
 
-        int cartItemCount = 0;
 
-        UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
-        model.addAttribute("loggedInUser", userDTO);
-
-        cartItemCount = cartService.getCartItemCount(user.getId());
-        model.addAttribute("cartItemCount", cartItemCount);
 
         Order order = orderService.findById(orderId);
         if (order != null && order.getStatus() == Order.OrderStatus.NOT_PROCESS) {
+            order.setStatus(Order.OrderStatus.PROCESSING);
             orderService.save(order);
 
             cartService.clearCart(order.getUserId());
@@ -189,14 +168,6 @@ public class PaymentController {
         if (cart == null || cart.getItems().isEmpty()) {
             return "redirect:/cart";
         }
-
-        int cartItemCount = 0;
-
-        UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
-        model.addAttribute("loggedInUser", userDTO);
-
-        cartItemCount = cartService.getCartItemCount(user.getId());
-        model.addAttribute("cartItemCount", cartItemCount);
 
         Order order = orderService.findById(orderId);
 

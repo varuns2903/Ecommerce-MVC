@@ -24,13 +24,13 @@ public class OrderService {
         return orderRepository.findById(id).get();
     }
 
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
     public List<Order> getOrdersByUser(String userId) {
         List<Order> orders = orderRepository.findByUserId(userId);
         return orders;
-    }
-
-    public Order getOrderById(String id) {
-        return orderRepository.findById(id).get();
     }
 
     public Order createOrder(User user, List<ProductItem> items, String address) {
@@ -44,23 +44,6 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    public void updateOrderStatus(String id, String status) {
-        Optional<Order> optionalOrder = orderRepository.findById(id);
-        if (optionalOrder.isPresent()) {
-            Order order = optionalOrder.get();
-
-            try {
-                Order.OrderStatus newStatus = Order.OrderStatus.valueOf(status.toUpperCase());
-                order.setStatus(newStatus);
-                orderRepository.save(order);
-            } catch (IllegalArgumentException e) {
-                throw new RuntimeException("Invalid order status: " + status);
-            }
-        } else {
-            throw new RuntimeException("Order not found with ID: " + id);
-        }
-    }
-
     public void deleteById(String id) {
         orderRepository.deleteById(id);
     }
@@ -69,10 +52,6 @@ public class OrderService {
         Order order = findById(id);
         order.setStatus(updatedOrder.getStatus());
         return orderRepository.save(order);
-    }
-
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
     }
 
 }

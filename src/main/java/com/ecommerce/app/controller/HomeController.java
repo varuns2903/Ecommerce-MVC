@@ -1,7 +1,6 @@
 package com.ecommerce.app.controller;
 
 import com.ecommerce.app.dto.UserDTO;
-import com.ecommerce.app.model.Category;
 import com.ecommerce.app.model.Product;
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.service.*;
@@ -35,8 +34,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model, HttpServletRequest request) {
-        List<Category> categories = categoryService.getAllCategories();
-        List<Product> products = productService.getAllProducts();
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
@@ -60,8 +57,6 @@ public class HomeController {
             model.addAttribute("wishlistProductIds", null);
         }
 
-        model.addAttribute("categories", categories);
-        model.addAttribute("products", products);
         model.addAttribute("cartItemCount", cartItemCount);
         model.addAttribute("servletPath", request.getServletPath());
 
@@ -91,9 +86,7 @@ public class HomeController {
             }
         }
 
-        List<Category> categories = categoryService.getAllCategories();
         List<Product> searchResults = productService.searchProducts(query);
-        model.addAttribute("categories", categories);
         model.addAttribute("products", searchResults);
         model.addAttribute("cartItemCount", cartItemCount);
         model.addAttribute("query", query);

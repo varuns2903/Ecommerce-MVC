@@ -1,7 +1,6 @@
 package com.ecommerce.app.controller;
 
 import com.ecommerce.app.dto.UserDTO;
-import com.ecommerce.app.model.Category;
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.model.Wishlist;
 import com.ecommerce.app.service.*;
@@ -13,7 +12,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -23,13 +21,10 @@ public class WishlistController {
 
     private final WishlistService wishlistService;
     private final UserService userService;
-    private final CategoryService categoryService;
     private final CartService cartService;
 
     @PostMapping("/add")
     public String addToWishlist(@RequestParam("productId") String productId, Model model) {
-
-        List<Category> categories = categoryService.getAllCategories();
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
@@ -52,7 +47,6 @@ public class WishlistController {
             return "redirect:/login";
         }
 
-        model.addAttribute("categories", categories);
         model.addAttribute("cartItemCount", cartItemCount);
 
         return "redirect:/";
@@ -60,8 +54,6 @@ public class WishlistController {
 
     @GetMapping
     public String viewWishlist(Model model) {
-
-        List<Category> categories = categoryService.getAllCategories();
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
@@ -85,8 +77,11 @@ public class WishlistController {
             return "redirect:/login?redirectTo=/wishlist";
         }
 
-        model.addAttribute("categories", categories);
         model.addAttribute("cartItemCount", cartItemCount);
+
+        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
+        if(isAdmin)
+            return "admin/wishlist";
 
         return "user/wishlist";
     }
@@ -110,8 +105,6 @@ public class WishlistController {
     @GetMapping("/remove/{productId}")
     public String removeFromWishlist(@PathVariable String productId, Model model) {
 
-        List<Category> categories = categoryService.getAllCategories();
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
 
@@ -133,7 +126,6 @@ public class WishlistController {
             return "redirect:/login";
         }
 
-        model.addAttribute("categories", categories);
         model.addAttribute("cartItemCount", cartItemCount);
 
         return "redirect:/wishlist";

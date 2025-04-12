@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
@@ -62,6 +63,30 @@ public class CartService {
         }
 
         cartRepository.save(cart);
+    }
+
+    public Cart decreaseQuantity(String userId, String productId) {
+        Cart cart = getCartByUser(userId);
+
+        if (cart == null || cart.getItems() == null) {
+            return null;
+        }
+
+        Iterator<ProductItem> iterator = cart.getItems().iterator();
+        while (iterator.hasNext()) {
+            ProductItem item = iterator.next();
+            if (item.getProduct().getId().equals(productId)) {
+                if (item.getQuantity() <= 1) {
+                    iterator.remove();
+                } else {
+                    item.setQuantity(item.getQuantity() - 1);
+                    item.setTotalPrice(item.getQuantity() * item.getPrice());
+                }
+                break;
+            }
+        }
+
+        return cartRepository.save(cart);
     }
 
     public Cart updateCartQuantities(String userId, Map<String, Integer> quantities) {

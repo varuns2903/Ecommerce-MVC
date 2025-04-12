@@ -1,22 +1,22 @@
 package com.ecommerce.app.controller;
 
 import com.ecommerce.app.dto.UserDTO;
-import com.ecommerce.app.model.Product;
 import com.ecommerce.app.model.User;
 import com.ecommerce.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.List;
 import java.util.Optional;
 
-@Controller
-public class ProductController {
+@ControllerAdvice
+public class GlobalModelAttributes {
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private ProductService productService;
@@ -25,14 +25,13 @@ public class ProductController {
     private CategoryService categoryService;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private CartService cartService;
 
-    @GetMapping("/product/{id}")
-    public String products(@PathVariable String id, Model model) {
+    @Autowired
+    private OrderService orderService;
 
+    @ModelAttribute
+    public void addGlobalAttributes(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
 
@@ -51,15 +50,9 @@ public class ProductController {
             }
         }
 
-        Product product = productService.getProductById(id);
-
-        List<Product> similarProducts = productService.getSimilarProducts(product.getCategoryId(), id);
-
         model.addAttribute("cartItemCount", cartItemCount);
-        model.addAttribute("product", product);
-        model.addAttribute("similarProduct", similarProducts);
-
-        return "product-details";
+        model.addAttribute("products", productService.getAllProducts());
+        model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("allOrders", orderService.getAllOrders());
     }
-
 }
