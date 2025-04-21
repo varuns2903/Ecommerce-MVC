@@ -51,6 +51,16 @@
         .star-rating {
             color: #f8c307;
         }
+        .star-rating i {
+            margin-right: 2px;
+        }
+        .debug-info {
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+        .debug-star {
+            border: 1px dashed #ff0000; /* Visible for debugging */
+        }
     </style>
 </head>
 <body>
@@ -122,8 +132,15 @@
                             <div>
                                 <span class="fw-bold" th:text="${review.userEmail}">Anonymous</span>
                                 <div class="star-rating">
-                                    <i th:each="i : ${#numbers.sequence(1, review.rating)}" class="fas fa-star"></i>
-                                    <i th:each="i : ${#numbers.sequence(review.rating + 1, 5)}" class="far fa-star"></i>
+                                    <!-- Filled Stars -->
+                                    <span th:each="i : ${#numbers.sequence(1, review.rating)}">
+                                        <i class="fas fa-star "></i>
+                                    </span>
+                                    <!-- Hollow Stars (Skip if rating is 5) -->
+                                    <span th:unless="${review.rating == 5}" th:each="i : ${#numbers.sequence(review.rating + 1, 5)}">
+                                        <i class="far fa-star "></i>
+                                    </span>
+
                                 </div>
                             </div>
                             <div class="text-muted small" th:text="${#temporals.format(review.timestamp, 'dd MMM yyyy')}">12 Mar 2025</div>
