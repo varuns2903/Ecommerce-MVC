@@ -65,6 +65,7 @@
                     <h5 class="mb-0">Admin Dashboard</h5>
                 </div>
                 <ul class="list-group list-group-flush">
+
                     <!-- Management Links -->
                     <li class="list-group-item">
                         <a th:href="@{/admin/products}" class="sidebar-link">
@@ -84,8 +85,10 @@
                         </a>
                         <small class="text-muted" th:text="${#lists.size(allOrders)} + ' orders'"></small>
                     </li>
+
                     <!-- Divider -->
                     <li class="list-group-item bg-light text-center fw-bold">Personal</li>
+
                     <!-- Personal Links -->
                     <li class="list-group-item">
                         <a th:href="@{/admin/dashboard}" class="sidebar-link">
@@ -135,8 +138,6 @@
                                            order.status.name() == 'DELIVERED' ? ' bg-success' : ' bg-danger'
                                          }"
                                          th:text="${order.status}"></span></p>
-
-
 
                         <table class="table table-sm">
                             <thead>

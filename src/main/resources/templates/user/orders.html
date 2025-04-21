@@ -106,7 +106,7 @@
                   <div th:if="${order.status.name() == 'DELIVERED' and reviewService != null}">
                     <!-- Check if user has already reviewed this product -->
                     <div th:if="${#authentication.name != null and reviewService.hasUserReviewedProduct(#authentication.name, item.product.id)}">
-                      <button class="btn btn-sm btn-primary mt-2 review-button" disabled>
+                      <button class="btn btn-sm btn-primary mt-2 review-button cursor-not-allowed" disabled>
                         <i class="fas fa-pencil-alt"></i> Write Review
                       </button>
                       <p class="disabled-review-message"><i class="fas fa-check-circle"></i> You have already reviewed this product.</p>
