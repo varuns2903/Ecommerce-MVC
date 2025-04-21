@@ -18,7 +18,8 @@ public class Product {
     private double price;
 
     private String categoryId;
-
+    private double averageRating = 0.0;
+    private long reviewCount = 0;
     private int quantity;
     private String imageUrl;
 
