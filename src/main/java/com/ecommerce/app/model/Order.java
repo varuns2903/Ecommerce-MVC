@@ -14,6 +14,8 @@ public class Order {
     private String id;
 
     private String userId;
+    private String userEmail;
+    private boolean reviewed;
     private List<ProductItem> items;
     private String address;
     private OrderStatus status = OrderStatus.NOT_PROCESS;
@@ -26,4 +28,7 @@ public class Order {
     public double getTotalAmount() {
         return items.stream().mapToDouble(ProductItem::getTotalPrice).sum();
     }
+    public boolean isReviewed() { return reviewed; }
+
+    public void setReviewed(boolean reviewed) { this.reviewed = reviewed; }
 }

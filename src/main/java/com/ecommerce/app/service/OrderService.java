@@ -36,6 +36,7 @@ public class OrderService {
     public Order createOrder(User user, List<ProductItem> items, String address) {
         Order order = new Order();
         order.setUserId(user.getId());
+        order.setUserEmail(user.getEmail());
         order.setItems(items);
         order.setAddress(address);
         order.setStatus(Order.OrderStatus.NOT_PROCESS);
@@ -53,5 +54,9 @@ public class OrderService {
         order.setStatus(updatedOrder.getStatus());
         return orderRepository.save(order);
     }
+    public List<Order> getOrdersByEmailAndProductId(String email, String productId) {
+        return orderRepository.findByUserEmailAndItemsProductId(email, productId);
+    }
+
 
 }

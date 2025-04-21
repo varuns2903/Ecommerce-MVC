@@ -7,44 +7,34 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
-    .sidebar {
-        height: 100%;
-        background-color: #f8f9fa;
-        padding: 20px 0;
-    }
-    .sidebar-link {
-        padding: 10px 15px;
-        display: block;
-        color: #212529;
-        text-decoration: none;
-        border-left: 3px solid transparent;
-    }
-    .sidebar-link:hover, .sidebar-link.active {
-        background-color: #e9ecef;
-        border-left: 3px solid #0d6efd;
-    }
-    .sidebar-link i {
-        margin-right: 10px;
-    }
-    .order-image {
-        width: 60px;
-        height: 60px;
-        object-fit: cover;
-    }
-    .table th, .table td {
-        vertical-align: middle;
-    }
-    .badge-custom {
-        font-size: 0.75rem;
-        padding: 0.3rem 0.6rem;
-    }
+    .sidebar { height: 100%; background-color: #f8f9fa; padding: 20px 0; }
+    .sidebar-link { padding: 10px 15px; display: block; color: #212529; text-decoration: none; border-left: 3px solid transparent; }
+    .sidebar-link:hover, .sidebar-link.active { background-color: #e9ecef; border-left: 3px solid #0d6efd; }
+    .sidebar-link i { margin-right: 10px; }
+    .order-image { width: 60px; height: 60px; object-fit: cover; }
+    .table th, .table td { vertical-align: middle; }
+    .badge-custom { font-size: 0.75rem; padding: 0.3rem 0.6rem; }
+    .review-form { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px; }
+    .alert { position: fixed; top: 20px; right: 20px; z-index: 1050; }
+    .disabled-review-message { color: #6c757d; font-size: 0.9rem; margin-top: 5px; }
   </style>
 </head>
 <body>
 <div th:replace="~{components/navbar :: navbar}"></div>
 
+<!-- Flash Messages -->
+<div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+  <strong>Success!</strong> <span th:text="${successMessage}"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+  <strong>Error!</strong> <span th:text="${errorMessage}"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
 <div class="container-fluid">
   <div class="row">
+    <!-- Sidebar -->
     <div class="col-md-3 col-lg-2 sidebar">
       <div class="d-flex flex-column">
         <h5 class="mb-4 ps-3">My Account</h5>
@@ -75,8 +65,7 @@
       <div th:if="${orders != null && !orders.isEmpty()}">
         <div th:each="order : ${orders}" class="card mb-4 shadow-sm order-card"
              th:attr="data-href='/orders/' + ${order.id}"
-             onclick="window.location.href = this.getAttribute('data-href');"
-             style="cursor: pointer;">
+             style="cursor: pointer;" onclick="handleCardClick(event, this)">
           <div class="card-header d-flex justify-content-between align-items-center bg-light">
             <div>
               <span>Order ID: <strong th:text="${order.id}">#12345</strong></span>
@@ -87,12 +76,12 @@
             <p class="mb-3">Status:
               <span class="badge"
                     th:classappend="${
-                            order.status.name() == 'NOT_PROCESS' ? ' bg-secondary' :
-                            order.status.name() == 'PROCESSING' ? ' bg-info' :
-                            order.status.name() == 'SHIPPED' ? ' bg-primary' :
-                            order.status.name() == 'OUT_FOR_DELIVERY' ? ' bg-warning' :
-                            order.status.name() == 'DELIVERED' ? ' bg-success' : ' bg-danger'
-                          }"
+                      order.status.name() == 'NOT_PROCESS' ? ' bg-secondary' :
+                      order.status.name() == 'PROCESSING' ? ' bg-info' :
+                      order.status.name() == 'SHIPPED' ? ' bg-primary' :
+                      order.status.name() == 'OUT_FOR_DELIVERY' ? ' bg-warning' :
+                      order.status.name() == 'DELIVERED' ? ' bg-success' : ' bg-danger'
+                    }"
                     th:text="${order.status}">DELIVERED</span>
             </p>
 
@@ -111,6 +100,54 @@
                     <img th:src="@{${item.product.imageUrl}}" alt="Product Image"
                          class="me-3 rounded" style="width: 50px; height: 50px; object-fit: cover;">
                     <span th:text="${item.product.name}">Sample Product</span>
+                  </div>
+
+                  <!-- Review Section for DELIVERED Orders -->
+                  <div th:if="${order.status.name() == 'DELIVERED' and reviewService != null}">
+                    <!-- Check if user has already reviewed this product -->
+                    <div th:if="${#authentication.name != null and reviewService.hasUserReviewedProduct(#authentication.name, item.product.id)}">
+                      <button class="btn btn-sm btn-primary mt-2 review-button" disabled>
+                        <i class="fas fa-pencil-alt"></i> Write Review
+                      </button>
+                      <p class="disabled-review-message"><i class="fas fa-check-circle"></i> You have already reviewed this product.</p>
+                    </div>
+                    <!-- Show Review Button and Form if not reviewed -->
+                    <div th:unless="${#authentication.name != null and reviewService.hasUserReviewedProduct(#authentication.name, item.product.id)}">
+                      <button class="btn btn-sm btn-primary mt-2 review-button"
+                              th:data-order-id="${order.id}"
+                              th:data-product-id="${item.product.id}">
+                        <i class="fas fa-pencil-alt"></i> Write Review
+                      </button>
+
+                      <!-- Review Form (Initially Hidden) -->
+                      <div th:id="'reviewForm-' + ${order.id} + '-' + ${item.product.id}" class="review-form mt-2" style="display: none;">
+                        <form th:action="@{/reviews}" method="post" th:id="'form-' + ${order.id} + '-' + ${item.product.id}" class="review-submission-form">
+                          <input type="hidden" name="productId" th:value="${item.product.id}" />
+                          <input type="hidden" name="orderId" th:value="${order.id}" />
+                          <div class="mb-2">
+                            <label class="form-label">Rating:</label>
+                            <select name="rating" class="form-select form-select-sm" required>
+                              <option value="">Select</option>
+                              <option value="1">1 - Poor</option>
+                              <option value="2">2 - Fair</option>
+                              <option value="3">3 - Good</option>
+                              <option value="4">4 - Very Good</option>
+                              <option value="5">5 - Excellent</option>
+                            </select>
+                          </div>
+                          <div class="mb-2">
+                            <label class="form-label">Review:</label>
+                            <textarea name="comment" class="form-control form-control-sm" rows="2" placeholder="Write your review here..." required></textarea>
+                          </div>
+                          <button type="submit" class="btn btn-sm btn-success">
+                            <i class="fas fa-paper-plane"></i> Submit Review
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                  <div th:if="${order.status.name() == 'DELIVERED' and reviewService == null}">
+                    <p class="text-danger">Error: Review service unavailable</p>
                   </div>
                 </td>
                 <td th:text="${item.quantity}">1</td>
@@ -135,5 +172,24 @@
 
 <div th:replace="~{components/footer :: footer}"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function handleCardClick(event, element) {
+    if (!event.target.closest('.review-button') && !event.target.closest('.review-form')) {
+      window.location.href = element.getAttribute('data-href');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.review-button:not([disabled])').forEach(function (button) {
+      button.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const orderId = button.getAttribute('data-order-id');
+        const productId = button.getAttribute('data-product-id');
+        const form = document.getElementById(`reviewForm-${orderId}-${productId}`);
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      });
+    });
+  });
+</script>
 </body>
 </html>

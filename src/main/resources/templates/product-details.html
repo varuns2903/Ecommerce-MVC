@@ -39,6 +39,18 @@
             transform: translateY(-5px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+        .review-section {
+            margin: 30px 0;
+        }
+        .review-card {
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .star-rating {
+            color: #f8c307;
+        }
     </style>
 </head>
 <body>
@@ -88,6 +100,41 @@
 
             <!-- Out of Stock Button (Disabled) -->
             <button th:if="${product.quantity <= 0}" class="btn btn-secondary" disabled>Out of Stock</button>
+
+            <!-- Reviews Section -->
+            <div class="review-section">
+                <h5>Customer Reviews</h5>
+                <div class="mb-3">
+                    <span th:if="${reviewCount > 0}">
+                        Average Rating:
+                        <span class="star-rating">
+                            <i th:each="i : ${#numbers.sequence(1, averageRating.intValue())}" class="fas fa-star"></i>
+                            <i th:if="${averageRating % 1 >= 0.5}" class="fas fa-star-half-alt"></i>
+                            <i th:each="i : ${#numbers.sequence((averageRating.intValue() + (averageRating % 1 >= 0.5 ? 1 : 0) + 1), 5)}" class="far fa-star"></i>
+                        </span>
+                        <span th:text="${#numbers.formatDecimal(averageRating, 1, 1) + ' / 5 (' + reviewCount + ' reviews)'}">4.5 / 5 (10 reviews)</span>
+                    </span>
+                    <span th:if="${reviewCount == 0}" class="text-muted">No reviews yet</span>
+                </div>
+                <div th:if="${reviews != null && !reviews.isEmpty()}">
+                    <div th:each="review : ${reviews}" class="review-card">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <span class="fw-bold" th:text="${review.userEmail}">Anonymous</span>
+                                <div class="star-rating">
+                                    <i th:each="i : ${#numbers.sequence(1, review.rating)}" class="fas fa-star"></i>
+                                    <i th:each="i : ${#numbers.sequence(review.rating + 1, 5)}" class="far fa-star"></i>
+                                </div>
+                            </div>
+                            <div class="text-muted small" th:text="${#temporals.format(review.timestamp, 'dd MMM yyyy')}">12 Mar 2025</div>
+                        </div>
+                        <p class="mt-2" th:text="${review.comment}">Great product!</p>
+                    </div>
+                </div>
+                <div th:if="${reviews == null || reviews.isEmpty()}" class="alert alert-info">
+                    No reviews yet for this product.
+                </div>
+            </div>
 
             <!-- Product Metadata -->
             <div class="mt-4 text-muted small">

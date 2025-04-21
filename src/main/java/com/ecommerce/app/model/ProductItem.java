@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class ProductItem {
     @DBRef
     private Product product;
+    private String productId;
 
     private int quantity;
     private double price;
@@ -17,6 +18,7 @@ public class ProductItem {
 
     public ProductItem(Product product, int quantity) {
         this.product = product;
+        this.productId = product.getId();
         this.quantity = quantity;
         this.price = product.getPrice();
         this.totalPrice = this.price * this.quantity;

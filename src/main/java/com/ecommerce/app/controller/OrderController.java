@@ -32,35 +32,50 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private ReviewService reviewService;
+
     @GetMapping("/orders")
     public String userOrders(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
 
-        if(!isAuthenticated)
+        if (!isAuthenticated)
             return "redirect:/login";
 
         int cartItemCount = 0;
+        UserDTO userDTO = null;
+        List<Order> orders = List.of();
 
         if (isAuthenticated) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof CustomUserDetail userDetails) {
+                System.out.println("Authentication name: " + userDetails.getUsername());
                 Optional<User> userOptional = userService.getUserByEmail(userDetails.getUsername());
                 if (userOptional.isPresent()) {
                     User user = userOptional.get();
-                    UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
-                    model.addAttribute("loggedInUser", userDTO);
+                    userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
                     cartItemCount = cartService.getCartItemCount(user.getId());
-                    model.addAttribute("cartItemCount", cartItemCount);
-                    List<Order> orders = orderService.getOrdersByUser(user.getId());
-                    model.addAttribute("orders", orders);
-
+                    orders = orderService.getOrdersByUser(user.getId());
                 }
             }
         }
 
+        model.addAttribute("loggedInUser", userDTO);
+        model.addAttribute("cartItemCount", cartItemCount);
+        model.addAttribute("orders", orders);
+        model.addAttribute("reviewService", reviewService);
+
+        // Log flash attributes
+        if (model.containsAttribute("successMessage")) {
+            System.out.println("Success Message in OrderController: " + model.getAttribute("successMessage"));
+        }
+        if (model.containsAttribute("errorMessage")) {
+            System.out.println("Error Message in OrderController: " + model.getAttribute("errorMessage"));
+        }
+
         boolean isAdmin = authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
-        if(isAdmin)
+        if (isAdmin)
             return "admin/orders";
 
         return "user/orders";
@@ -75,24 +90,29 @@ public class OrderController {
             return "redirect:/login";
 
         int cartItemCount = 0;
+        UserDTO userDTO = null;
+        Order order = null;
 
         if (isAuthenticated) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof CustomUserDetail userDetails) {
+                System.out.println("Authentication name: " + userDetails.getUsername());
                 Optional<User> userOptional = userService.getUserByEmail(userDetails.getUsername());
                 if (userOptional.isPresent()) {
                     User user = userOptional.get();
-                    UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
-                    model.addAttribute("loggedInUser", userDTO);
+                    userDTO = new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getAddress());
                     cartItemCount = cartService.getCartItemCount(user.getId());
-                    model.addAttribute("cartItemCount", cartItemCount);
-                    Order order = orderService.findById(orderId);
-                    model.addAttribute("order", order);
+                    order = orderService.findById(orderId);
                 }
             }
         }
 
-        if (redirectAttributes.containsAttribute("message")) {
+        model.addAttribute("loggedInUser", userDTO);
+        model.addAttribute("cartItemCount", cartItemCount);
+        model.addAttribute("order", order);
+
+        // Handle flash attributes
+        if (redirectAttributes.getFlashAttributes().containsKey("message")) {
             model.addAttribute("message", redirectAttributes.getFlashAttributes().get("message"));
         }
 
@@ -102,7 +122,6 @@ public class OrderController {
 
         return "user/order-details";
     }
-
 
     @PostMapping("/orders/cancel/{id}")
     public String cancelOrder(@PathVariable("id") String orderId, RedirectAttributes redirectAttributes) {
@@ -124,7 +143,6 @@ public class OrderController {
 
         return "redirect:/orders/" + orderId;
     }
-
 
     private boolean canCancel(Order order) {
         return order.getStatus() == Order.OrderStatus.NOT_PROCESS ||
