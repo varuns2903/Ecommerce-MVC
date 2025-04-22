@@ -16,6 +16,9 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     public Order save(Order order) {
         return orderRepository.save(order);
     }
@@ -36,7 +39,6 @@ public class OrderService {
     public Order createOrder(User user, List<ProductItem> items, String address) {
         Order order = new Order();
         order.setUserId(user.getId());
-        order.setUserEmail(user.getEmail());
         order.setItems(items);
         order.setAddress(address);
         order.setStatus(Order.OrderStatus.NOT_PROCESS);
