@@ -40,7 +40,7 @@ public class OrderController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal());
 
-        if (!isAuthenticated)
+        if(!isAuthenticated)
             return "redirect:/login";
 
         int cartItemCount = 0;
